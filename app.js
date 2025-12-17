@@ -3,13 +3,13 @@
 // ======================================================================
 
 // 1. Your Cognito Domain URL (e.g., https://tasktracker-prod-123.auth.us-east-1.amazoncognito.com)
-const COGNITO_DOMAIN = 'https://ap-southeast-26go7gmxmq.auth.ap-southeast-2.amazoncognito.com'; 
+const COGNITO_DOMAIN = 'https://ap-southeast-2dv95qplzd.auth.ap-southeast-2.amazoncognito.com'; 
 
 // 2. Your Cognito App Client ID (Found in App Clients section of User Pool)
-const CLIENT_ID = '5aer3h66nbn12s1qil4hr1mqpe'; 
+const CLIENT_ID = '6me62dbf8t0jqaac8fr7qkfjad'; 
 
 // 3. Your S3 Website Endpoint (e.g., http://tasktracker-yourname-frontend.s3-website-us-east-1.amazonaws.com)
-const REDIRECT_URI = 'https://tasktracker-shanmugeshwaran-frontend.s3-website-ap-southeast-2.amazonaws.com/Activity2/'; 
+const REDIRECT_URI = 'http://localhost:8080'; 
 
 // ======================================================================
 // !!! STEP 2: DO NOT CHANGE CODE BELOW THIS LINE !!!
