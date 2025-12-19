@@ -9,7 +9,7 @@ const COGNITO_DOMAIN = 'https://ap-southeast-2dv95qplzd.auth.ap-southeast-2.amaz
 const CLIENT_ID = '6me62dbf8t0jqaac8fr7qkfjad'; 
 
 // 3. Your S3 Website Endpoint (e.g., http://tasktracker-yourname-frontend.s3-website-us-east-1.amazonaws.com)
-const REDIRECT_URI = 'http://localhost:8080'; 
+const REDIRECT_URI = 'https://master.d2s2un2lla3e9.amplifyapp.com'; 
 
 // ======================================================================
 // !!! STEP 2: DO NOT CHANGE CODE BELOW THIS LINE !!!
