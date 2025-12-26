@@ -8,7 +8,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>Task Tracker Login</h1>
+        <h1>Task Tracker</h1>
+        
         <p id="status-message" class="status-initial">
             Please click the button below to log in.
         </p>
@@ -21,6 +22,19 @@
             <button id="logout-button" class="button secondary-button hidden">
                 Logout
             </button>
+        </div>
+
+        <hr> <div id="task-section" class="hidden">
+            <h3>Manage Your Tasks</h3>
+            
+            <div class="input-group">
+                <input type="text" id="task-input" placeholder="What needs to be done?">
+                <button id="add-task-btn" class="button add-button">Add Task</button>
+            </div>
+
+            <ul id="task-list">
+                <p>Loading tasks...</p>
+            </ul>
         </div>
     </div>
 
