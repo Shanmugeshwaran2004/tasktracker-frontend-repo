@@ -143,7 +143,7 @@ async function deleteTask(id) {
 
     try {
         // Note: Using your sibling layout /prod/{id}
-        const response = await fetch(`${API_BASE_URL}/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': userToken }
         });
