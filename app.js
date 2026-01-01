@@ -155,3 +155,28 @@ async function deleteTask(id) {
         console.error("Delete Error:", err);
     }
 }
+function createTaskElement(task) {
+    const li = document.createElement('li');
+    li.innerHTML = `
+        <span>${task.task_name}</span>
+        <select class="status-select" onchange="updateStatus('${task.task_id}', this.value)">
+            <option value="pending" ${task.status === 'pending' ? 'selected' : ''}>Pending</option>
+            <option value="in progress" ${task.status === 'in progress' ? 'selected' : ''}>In Progress</option>
+            <option value="completed" ${task.status === 'completed' ? 'selected' : ''}>Completed</option>
+        </select>
+        <button onclick="deleteTask('${task.task_id}')">Delete</button>
+    `;
+    return li;
+}
+
+async function updateStatus(id, newStatus) {
+    const userToken = localStorage.getItem('id_token');
+    await fetch(`${API_BASE_URL}/tasks/${id}`, {
+        method: 'PATCH',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': userToken 
+        },
+        body: JSON.stringify({ status: newStatus })
+    });
+}
