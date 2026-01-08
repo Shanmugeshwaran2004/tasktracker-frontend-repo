@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskSection = document.getElementById('task-section'); 
     const addButton = document.getElementById('add-task-btn');
     const taskInput = document.getElementById('task-input');
+    const initialStatusSelect = document.getElementById('initial-status-select'); // New Dropdown
 
     const urlHash = window.location.hash;
     
@@ -41,8 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (addButton) {
             addButton.onclick = async () => {
                 const name = taskInput.value.trim();
+                const status = initialStatusSelect.value; // Get selected status
+                
                 if (!name) return alert("Please enter a task name");
-                await createTask(name);
+                
+                await createTask(name, status);
                 taskInput.value = ""; 
             };
         }
@@ -73,7 +77,7 @@ async function fetchTasks() {
         if (!response.ok) throw new Error("Failed to fetch tasks");
 
         const tasks = await response.json();
-        displayTasks(tasks); // This now calls the interactive display function
+        displayTasks(tasks); 
         
     } catch (err) {
         console.error("Fetch Error:", err);
@@ -81,13 +85,13 @@ async function fetchTasks() {
     }
 }
 
-// 2. CREATE A NEW TASK (POST)
-async function createTask(name) {
+// 2. CREATE A NEW TASK (POST) - Now includes Status
+async function createTask(name, status) {
     const newTask = {
         task_id: "ID-" + Date.now(),
         user_id: "user123", 
         task_name: name,
-        status: "pending" // Explicitly setting initial status
+        status: status // Uses the value from the top dropdown
     };
 
     try {
@@ -110,9 +114,8 @@ async function createTask(name) {
     }
 }
 
-// 3. RENDER TASKS (The interactive part)
+// 3. RENDER TASKS (Interactive list with rewrite and status change)
 function displayTasks(tasks) {
-    // We use the same ID as your list in the screenshot
     const taskList = document.getElementById('task-list');
     if (!taskList) return;
 
@@ -133,9 +136,9 @@ function displayTasks(tasks) {
                     onchange="updateTask('${task.task_id}', this.value, null)" />
                 
                 <select class="status-select" onchange="updateTask('${task.task_id}', null, this.value)">
-                    <option value="pending" ${task.status === 'pending' ? 'selected' : ''}>Pending</option>
-                    <option value="progress" ${task.status === 'progress' ? 'selected' : ''}>In Progress</option>
-                    <option value="done" ${task.status === 'done' ? 'selected' : ''}>Done</option>
+                    <option value="pending" ${task.status === 'pending' ? 'selected' : ''}>⏳ Pending</option>
+                    <option value="progress" ${task.status === 'progress' ? 'selected' : ''}>🚧 In Progress</option>
+                    <option value="done" ${task.status === 'done' ? 'selected' : ''}>✅ Done</option>
                 </select>
             </div>
             <button class="delete-btn" onclick="deleteTask('${task.task_id}')">Delete</button>
@@ -144,9 +147,8 @@ function displayTasks(tasks) {
     });
 }
 
-// 4. UPDATE TASK (PATCH)
+// 4. UPDATE TASK (PATCH) - Handles both text edits and status changes
 async function updateTask(taskId, newName, newStatus) {
-    // Only send what is actually changed
     const payload = {};
     if (newName !== null) payload.task_name = newName;
     if (newStatus !== null) payload.status = newStatus;
@@ -162,8 +164,7 @@ async function updateTask(taskId, newName, newStatus) {
         });
 
         if (response.ok) {
-            console.log("Updated successfully");
-            fetchTasks(); // Refresh to update borders/styles
+            fetchTasks(); // Refresh to update visuals (like colors)
         }
     } catch (err) {
         console.error("Update failed", err);

@@ -24,11 +24,20 @@
             </button>
         </div>
 
-        <hr> <div id="task-section" class="hidden">
+        <hr> 
+        
+        <div id="task-section" class="hidden">
             <h3>Manage Your Tasks</h3>
             
             <div class="input-group">
                 <input type="text" id="task-input" placeholder="What needs to be done?">
+                
+                <select id="initial-status-select" class="status-select">
+                    <option value="pending">⏳ Pending</option>
+                    <option value="progress">🚧 In Progress</option>
+                    <option value="done">✅ Done</option>
+                </select>
+
                 <button id="add-task-btn" class="button add-button">Add Task</button>
             </div>
 
