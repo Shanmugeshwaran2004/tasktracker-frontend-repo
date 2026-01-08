@@ -135,3 +135,24 @@ input[type="text"]:focus {
     border-radius: 4px;
     margin: 0 10px;
 }
+/* Status specific colors */
+.status-pending { border-left: 5px solid #f1c40f; }   /* Yellow */
+.status-progress { border-left: 5px solid #3498db; }  /* Blue */
+.status-done { border-left: 5px solid #2ecc71; text-decoration: line-through; color: #7f8c8d; } /* Green */
+
+.task-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9f9f9;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
+.edit-input {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px;
+    font-size: 14px;
+}

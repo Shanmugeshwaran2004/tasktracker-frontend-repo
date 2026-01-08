@@ -155,28 +155,58 @@ async function deleteTask(id) {
         console.error("Delete Error:", err);
     }
 }
-function createTaskElement(task) {
-    const li = document.createElement('li');
-    li.innerHTML = `
-        <span>${task.task_name}</span>
-        <select class="status-select" onchange="updateStatus('${task.task_id}', this.value)">
-            <option value="pending" ${task.status === 'pending' ? 'selected' : ''}>Pending</option>
-            <option value="in progress" ${task.status === 'in progress' ? 'selected' : ''}>In Progress</option>
-            <option value="completed" ${task.status === 'completed' ? 'selected' : ''}>Completed</option>
-        </select>
-        <button onclick="deleteTask('${task.task_id}')">Delete</button>
-    `;
-    return li;
+
+// Function to render each task
+function displayTasks(tasks) {
+    const container = document.getElementById('task-container');
+    container.innerHTML = '';
+
+    tasks.forEach(task => {
+        const div = document.createElement('div');
+        div.className = `task-card status-${task.status}`;
+        
+        div.innerHTML = `
+            <div>
+                <input type="text" class="edit-input" value="${task.task_name}" 
+                    onblur="updateTask('${task.task_id}', this.value, null)" />
+                
+                <select onchange="updateTask('${task.task_id}', null, this.value)">
+                    <option value="pending" ${task.status === 'pending' ? 'selected' : ''}>Pending</option>
+                    <option value="progress" ${task.status === 'progress' ? 'selected' : ''}>In Progress</option>
+                    <option value="done" ${task.status === 'done' ? 'selected' : ''}>Done</option>
+                </select>
+            </div>
+            <button class="delete-btn" onclick="deleteTask('${task.task_id}')">Delete</button>
+        `;
+        container.appendChild(div);
+    });
 }
 
-async function updateStatus(id, newStatus) {
-    const userToken = localStorage.getItem('id_token');
-    await fetch(`${API_BASE_URL}/tasks/${id}`, {
-        method: 'PATCH',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': userToken 
-        },
-        body: JSON.stringify({ status: newStatus })
-    });
+// Function to handle both Text Edit and Status Change
+async function updateTask(taskId, newName, newStatus) {
+    const token = localStorage.getItem('id_token');
+    
+    // We only send what changed
+    const payload = {};
+    if (newName) payload.task_name = newName;
+    if (newStatus) payload.status = newStatus;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            console.log("Updated successfully");
+            // Refresh to apply CSS changes (like line-through for 'done')
+            fetchTasks(); 
+        }
+    } catch (err) {
+        console.error("Update failed", err);
+    }
 }
