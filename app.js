@@ -89,12 +89,13 @@ function displayTasks(tasks) {
 
     tasks.forEach(task => {
         const li = document.createElement('li');
+        // This line connects the status (pending/progress/done) to the CSS colors
         li.className = `task-item status-${task.status}`;
         
         li.innerHTML = `
             <div class="task-info">
                 <strong>${task.task_name}</strong>
-                <small>Status: ${task.status.toUpperCase()}</small>
+                <small>${task.status.toUpperCase()}</small>
             </div>
             <div class="task-buttons">
                 <button class="edit-btn" onclick="openEditMenu('${task.task_id}', '${task.task_name}')">Edit</button>
@@ -104,7 +105,6 @@ function displayTasks(tasks) {
         taskList.appendChild(li);
     });
 }
-
 // 3. EDIT MENU (Acts like a checklist selection)
 async function openEditMenu(id, currentName) {
     // Part 1: Edit Name

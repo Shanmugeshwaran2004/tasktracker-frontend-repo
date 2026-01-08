@@ -172,7 +172,7 @@ h1 {
 }
 
 .delete-btn {
-    background-color: #636e72; /* Subtle gray for delete */
+    background-color: #f00909; /* Subtle gray for delete */
     color: white;
     padding: 6px 14px;
     border: none;
@@ -180,4 +180,23 @@ h1 {
     cursor: pointer;
 }
 
-.delete-btn:hover { background-color: #2d3436; }
+.delete-btn:hover { background-color: #b50f04; }
+.status-progress { border-left: 8px solid #3498db; }
+.status-progress small { color: #2980b9; font-weight: bold; }
+
+/* Done = Green */
+.status-done { border-left: 8px solid #2ecc71; }
+.status-done small { color: #27ae60; font-weight: bold; }
+.status-done strong { text-decoration: line-through; color: #95a5a6; }
+
+/* Standard Task Item Styling */
+.task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
