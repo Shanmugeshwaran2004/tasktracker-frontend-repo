@@ -200,3 +200,10 @@ h1 {
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
+.status-pending { 
+    border-left: 10px solid #f1c40f; /* Strong Yellow Border */
+}
+.status-pending small { 
+    color: #f39c12; /* Orange-Yellow text */
+    font-weight: bold; 
+}
