@@ -2,13 +2,9 @@
 // !!! STEP 1: CONFIGURATION !!!
 // ======================================================================
 
-// 1. Your Cognito Details (Already Provided)
 const COGNITO_DOMAIN = 'https://ap-southeast-2dv95qplzd.auth.ap-southeast-2.amazoncognito.com'; 
 const CLIENT_ID = '6me62dbf8t0jqaac8fr7qkfjad'; 
 const REDIRECT_URI = 'https://master.d2s2un2lla3e9.amplifyapp.com/'; 
-
-// 2. YOUR API GATEWAY URL (Paste your Invoke URL here)
-// Example: 'https://abc123xyz.execute-api.ap-southeast-2.amazonaws.com/prod'
 const API_BASE_URL = 'https://x55qeapauh.execute-api.ap-southeast-2.amazonaws.com/prod'; 
 
 // ======================================================================
@@ -18,52 +14,43 @@ const API_BASE_URL = 'https://x55qeapauh.execute-api.ap-southeast-2.amazonaws.co
 const LOGIN_URL = `${COGNITO_DOMAIN}/login?response_type=token&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=openid%20email`;
 const LOGOUT_URL = `${COGNITO_DOMAIN}/logout?client_id=${CLIENT_ID}&logout_uri=${REDIRECT_URI}`;
 
-// Global variable to store the token for API calls
 let userToken = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginLink = document.getElementById('login-link');
     const logoutButton = document.getElementById('logout-button');
     const statusText = document.getElementById('status-message');
-    const taskSection = document.getElementById('task-section'); // Make sure this exists in HTML
+    const taskSection = document.getElementById('task-section'); 
     const addButton = document.getElementById('add-task-btn');
     const taskInput = document.getElementById('task-input');
 
-    // Check the URL hash for authentication tokens
     const urlHash = window.location.hash;
     
     if (urlHash.includes('id_token')) {
-        // --- LOGGED IN STATE ---
         const params = new URLSearchParams(urlHash.substring(1));
-        userToken = params.get('id_token'); // Capture the token
+        userToken = params.get('id_token'); 
         
         statusText.innerHTML = '✅ **Logged In!** Fetching your tasks...';
         
-        // UI Toggles
         loginLink.classList.add('hidden');
         logoutButton.classList.remove('hidden');
         if (taskSection) taskSection.classList.remove('hidden');
 
-        // Load initial data
         fetchTasks();
 
-        // Handle Add Task Button
         if (addButton) {
             addButton.onclick = async () => {
                 const name = taskInput.value.trim();
                 if (!name) return alert("Please enter a task name");
                 await createTask(name);
-                taskInput.value = ""; // Clear input after adding
+                taskInput.value = ""; 
             };
         }
 
         logoutButton.onclick = () => { window.location.href = LOGOUT_URL; };
-
-        // Clean URL for security
         history.replaceState(null, null, window.location.pathname + window.location.search);
 
     } else {
-        // --- LOGGED OUT STATE ---
         loginLink.href = LOGIN_URL;
         logoutButton.classList.add('hidden');
         if (taskSection) taskSection.classList.add('hidden');
@@ -77,32 +64,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 1. GET ALL TASKS
 async function fetchTasks() {
-    const taskList = document.getElementById('task-list');
-    if (!taskList) return;
-
     try {
         const response = await fetch(`${API_BASE_URL}/tasks`, {
             method: 'GET',
-            headers: { 
-                'Authorization': userToken // Sending token for future Authorizer setup
-            }
+            headers: { 'Authorization': userToken }
         });
 
         if (!response.ok) throw new Error("Failed to fetch tasks");
 
         const tasks = await response.json();
+        displayTasks(tasks); // This now calls the interactive display function
         
-        // Render tasks to the screen
-        if (tasks.length === 0) {
-            taskList.innerHTML = "<li>No tasks found. Add one above!</li>";
-        } else {
-            taskList.innerHTML = tasks.map(t => `
-                <li class="task-item">
-                    <span><strong>${t.task_name}</strong> (${t.status})</span>
-                    <button onclick="deleteTask('${t.task_id}')" class="delete-btn">Delete</button>
-                </li>
-            `).join('');
-        }
     } catch (err) {
         console.error("Fetch Error:", err);
         document.getElementById('status-message').innerHTML = "❌ Error loading tasks.";
@@ -112,9 +84,10 @@ async function fetchTasks() {
 // 2. CREATE A NEW TASK (POST)
 async function createTask(name) {
     const newTask = {
-        task_id: "ID-" + Date.now(), // Generate a unique ID based on timestamp
-        user_id: "user123",          // In a real app, this comes from the token
-        task_name: name
+        task_id: "ID-" + Date.now(),
+        user_id: "user123", 
+        task_name: name,
+        status: "pending" // Explicitly setting initial status
     };
 
     try {
@@ -128,7 +101,7 @@ async function createTask(name) {
         });
 
         if (response.ok) {
-            fetchTasks(); // Refresh list immediately
+            fetchTasks(); 
         } else {
             alert("Failed to save task.");
         }
@@ -137,40 +110,29 @@ async function createTask(name) {
     }
 }
 
-// 3. DELETE A TASK
-async function deleteTask(id) {
-    if (!confirm("Are you sure?")) return;
-
-    try {
-        // Note: Using your sibling layout /prod/{id}
-        const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': userToken }
-        });
-
-        if (response.ok) {
-            fetchTasks(); // Refresh list
-        }
-    } catch (err) {
-        console.error("Delete Error:", err);
-    }
-}
-
-// Function to render each task
+// 3. RENDER TASKS (The interactive part)
 function displayTasks(tasks) {
-    const container = document.getElementById('task-container');
-    container.innerHTML = '';
+    // We use the same ID as your list in the screenshot
+    const taskList = document.getElementById('task-list');
+    if (!taskList) return;
+
+    taskList.innerHTML = '';
+
+    if (tasks.length === 0) {
+        taskList.innerHTML = "<li>No tasks found. Add one above!</li>";
+        return;
+    }
 
     tasks.forEach(task => {
-        const div = document.createElement('div');
-        div.className = `task-card status-${task.status}`;
+        const li = document.createElement('li');
+        li.className = `task-item status-${task.status}`;
         
-        div.innerHTML = `
-            <div>
+        li.innerHTML = `
+            <div class="task-content">
                 <input type="text" class="edit-input" value="${task.task_name}" 
-                    onblur="updateTask('${task.task_id}', this.value, null)" />
+                    onchange="updateTask('${task.task_id}', this.value, null)" />
                 
-                <select onchange="updateTask('${task.task_id}', null, this.value)">
+                <select class="status-select" onchange="updateTask('${task.task_id}', null, this.value)">
                     <option value="pending" ${task.status === 'pending' ? 'selected' : ''}>Pending</option>
                     <option value="progress" ${task.status === 'progress' ? 'selected' : ''}>In Progress</option>
                     <option value="done" ${task.status === 'done' ? 'selected' : ''}>Done</option>
@@ -178,24 +140,22 @@ function displayTasks(tasks) {
             </div>
             <button class="delete-btn" onclick="deleteTask('${task.task_id}')">Delete</button>
         `;
-        container.appendChild(div);
+        taskList.appendChild(li);
     });
 }
 
-// Function to handle both Text Edit and Status Change
+// 4. UPDATE TASK (PATCH)
 async function updateTask(taskId, newName, newStatus) {
-    const token = localStorage.getItem('id_token');
-    
-    // We only send what changed
+    // Only send what is actually changed
     const payload = {};
-    if (newName) payload.task_name = newName;
-    if (newStatus) payload.status = newStatus;
+    if (newName !== null) payload.task_name = newName;
+    if (newStatus !== null) payload.status = newStatus;
 
     try {
         const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
             method: 'PATCH',
             headers: {
-                'Authorization': token,
+                'Authorization': userToken,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(payload)
@@ -203,10 +163,27 @@ async function updateTask(taskId, newName, newStatus) {
 
         if (response.ok) {
             console.log("Updated successfully");
-            // Refresh to apply CSS changes (like line-through for 'done')
-            fetchTasks(); 
+            fetchTasks(); // Refresh to update borders/styles
         }
     } catch (err) {
         console.error("Update failed", err);
+    }
+}
+
+// 5. DELETE A TASK
+async function deleteTask(id) {
+    if (!confirm("Are you sure?")) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': userToken }
+        });
+
+        if (response.ok) {
+            fetchTasks(); 
+        }
+    } catch (err) {
+        console.error("Delete Error:", err);
     }
 }
