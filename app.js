@@ -59,21 +59,30 @@ async function fetchTasks() {
     }
 }
 
+// ... (keep Step 1 Configuration as is) ...
+
+// 1. CREATE A NEW TASK (Defaults to pending)
 async function createTask(name) {
     const newTask = {
         task_id: "ID-" + Date.now(),
         user_id: "user123", 
         task_name: name,
-        status: "pending" 
+        status: "pending" // Always starts as pending
     };
-    await fetch(`${API_BASE_URL}/tasks`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': userToken },
-        body: JSON.stringify(newTask)
-    });
-    fetchTasks();
+
+    try {
+        await fetch(`${API_BASE_URL}/tasks`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': userToken },
+            body: JSON.stringify(newTask)
+        });
+        fetchTasks();
+    } catch (err) {
+        console.error("Create Error:", err);
+    }
 }
 
+// 2. RENDER TASKS
 function displayTasks(tasks) {
     const taskList = document.getElementById('task-list');
     taskList.innerHTML = '';
@@ -84,10 +93,11 @@ function displayTasks(tasks) {
         
         li.innerHTML = `
             <div class="task-info">
-                <strong>${task.task_name}</strong> <small>(${task.status})</small>
+                <strong>${task.task_name}</strong>
+                <small>Status: ${task.status.toUpperCase()}</small>
             </div>
             <div class="task-buttons">
-                <button class="edit-btn" onclick="openEditModal('${task.task_id}', '${task.task_name}', '${task.status}')">Edit</button>
+                <button class="edit-btn" onclick="openEditMenu('${task.task_id}', '${task.task_name}')">Edit</button>
                 <button class="delete-btn" onclick="deleteTask('${task.task_id}')">Delete</button>
             </div>
         `;
@@ -95,15 +105,28 @@ function displayTasks(tasks) {
     });
 }
 
-// THE NEW EDIT PROCESS
-async function openEditModal(id, currentName, currentStatus) {
-    const newName = prompt("Edit Task Name:", currentName);
-    if (newName === null) return; // Cancelled
+// 3. EDIT MENU (Acts like a checklist selection)
+async function openEditMenu(id, currentName) {
+    // Part 1: Edit Name
+    const newName = prompt("Update Task Name:", currentName);
+    if (newName === null) return;
 
-    const newStatus = prompt("Edit Status (pending, progress, done):", currentStatus);
-    if (newStatus === null) return; // Cancelled
+    // Part 2: Choose Status from a "List"
+    const choice = prompt(
+        "Select Status Number:\n1. Pending ⏳\n2. In Progress 🚧\n3. Done ✅"
+    );
 
-    const payload = { task_name: newName, status: newStatus.toLowerCase() };
+    let newStatus;
+    if (choice === "1") newStatus = "pending";
+    else if (choice === "2") newStatus = "progress";
+    else if (choice === "3") newStatus = "done";
+    else {
+        alert("Invalid choice. Status not changed.");
+        newStatus = null; 
+    }
+
+    const payload = { task_name: newName };
+    if (newStatus) payload.status = newStatus;
 
     await fetch(`${API_BASE_URL}/tasks/${id}`, {
         method: 'PATCH',
@@ -112,6 +135,8 @@ async function openEditModal(id, currentName, currentStatus) {
     });
     fetchTasks();
 }
+
+// ... (keep delete function as is) ...
 
 async function deleteTask(id) {
     if (!confirm("Delete this task?")) return;
